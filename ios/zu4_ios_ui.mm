@@ -205,9 +205,9 @@ void zu4_ios_setup_ui(SDL_Window *window)
 	CGFloat right = b.origin.x + b.size.width - safe.right;
 	CGFloat bottom = b.origin.y + b.size.height - safe.bottom;
 
-	const CGFloat DS = 40.0;  // d-pad button size
+	const CGFloat DS = 52.0;  // d-pad button size (bigger for easier movement)
 	const CGFloat S = 48.0;   // action button size
-	const CGFloat G = 4.0;    // gap
+	const CGFloat G = 5.0;    // gap
 
 	// ---- Left side: movement D-pad, anchored bottom-left ----
 	CGFloat dpx = left + 6.0;

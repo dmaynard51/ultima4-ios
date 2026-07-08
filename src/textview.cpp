@@ -38,8 +38,10 @@ void TextView::reinit() {
  * Draw a character from the charset onto the view.
  */
 void TextView::drawChar(int chr, int x, int y) {
-    zu4_assert(x < columns, "x value of %d out of range", x);
-    zu4_assert(y < rows, "y value of %d out of range", y);
+    // Clamp instead of aborting: overflowing text (e.g. long typed input) must
+    // never crash the game -- just skip cells outside the view.
+    if (x < 0 || x >= columns || y < 0 || y >= rows)
+        return;
 
     zu4_img_draw_subrect(charset, this->x + (x * CHAR_WIDTH),
                          this->y + (y * CHAR_HEIGHT),
@@ -209,7 +211,11 @@ void TextView::setCursorPos(int x, int y, bool clearOld) {
         x -= columns;
         y++;
     }
-    zu4_assert(y < rows, "y value of %d out of range", y);
+    // Clamp to the view instead of aborting when text runs past the last row
+    // (e.g. a long typed line); the cursor just parks on the final row.
+    if (y >= rows) y = rows - 1;
+    if (y < 0) y = 0;
+    if (x < 0) x = 0;
 
     if (clearOld && cursorEnabled) {
         drawChar(' ', cursorX, cursorY);
