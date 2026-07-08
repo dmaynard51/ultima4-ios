@@ -248,9 +248,9 @@ void zu4_ios_setup_ui(SDL_Window *window)
 	const CGFloat G = 5.0;    // gap
 
 	// ---- Left side: movement D-pad, anchored bottom-left ----
-	// Sit closer to the physical edge: use only a small slice of the safe-area
-	// inset instead of the full ~inch it reserves in landscape.
-	CGFloat dpx = b.origin.x + fmax(6.0, safe.left * 0.3);
+	// Hug the physical left edge (ignore the safe-area inset, which reserves
+	// ~an inch in landscape) with just a few points of margin.
+	CGFloat dpx = b.origin.x + 4.0;
 	CGFloat dpy = bottom - (DS * 3 + G * 2) - 10.0;
 	[g_overlay addSubview:zu4_make_button(@"▲", SDLK_UP,
 	         CGRectMake(dpx + DS + G, dpy, DS, DS), t)];
