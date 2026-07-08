@@ -87,6 +87,13 @@ set_target_properties(zu4 PROPERTIES
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
     XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0")
 
+# App icon: compile ios/Assets.xcassets (holding the AppIcon set) into the bundle.
+target_sources(zu4 PRIVATE "${CMAKE_SOURCE_DIR}/ios/Assets.xcassets")
+set_source_files_properties("${CMAKE_SOURCE_DIR}/ios/Assets.xcassets"
+    PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+set_target_properties(zu4 PROPERTIES
+    XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+
 IF(ZU4_IOS_TEAM)
     set_target_properties(zu4 PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
