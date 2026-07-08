@@ -20,7 +20,7 @@ set -euo pipefail
 ZU4_SRC="$(cd "$(dirname "$0")/.." && pwd)"
 TEAM="${1:?Usage: build-ios-device.sh <AppleTeamID> [ultima4-data-dir]}"
 U4_DATA="${2:-}"
-WORK="${ZU4_SRC}/ios/build"
+WORK="${HOME}/Library/Caches/zu4-ios-build"
 SDL_VER="2.30.10"
 BUNDLE_ID="${ZU4_IOS_BUNDLE_ID:-info.zu4.ultima4}"
 
