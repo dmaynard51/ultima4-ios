@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ZU4_SRC="$(cd "$(dirname "$0")/.." && pwd)"
-WORK="${ZU4_SRC}/ios/build"
+WORK="${HOME}/Library/Caches/zu4-ios-build"
 SDL_VER="2.30.10"
 ARCH="arm64"   # arm64 simulator (Apple Silicon); use x86_64 on Intel Macs.
 BUNDLE_ID="${ZU4_IOS_BUNDLE_ID:-info.zu4.ultima4}"
