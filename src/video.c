@@ -34,6 +34,10 @@
 #include "settings.h"
 #include "u4_sdl.h"
 
+#ifdef ZU4_IOS
+#include "zu4_ios_ui.h"
+#endif
+
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
@@ -76,6 +80,10 @@ void zu4_video_init() {
 
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
 		SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+#ifdef ZU4_IOS
+	zu4_ios_setup_ui(window);
+#endif
 }
 
 void zu4_video_deinit() {
