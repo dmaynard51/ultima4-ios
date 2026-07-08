@@ -9,6 +9,10 @@ project(zu4 CXX C)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Force the C++ standard through to the Xcode compiler. CMAKE_CXX_STANDARD alone
+# doesn't reliably reach Xcode's per-file flags, and the engine uses C++11
+# features (e.g. braced assignment `x = {0,0,0}`) that fail under the default.
+set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "gnu++14")
 
 # Sources (mirrors CSRCS/CXXSRCS in the Makefile, plus the bundled miniz).
 set(ZU4_C_SRCS
