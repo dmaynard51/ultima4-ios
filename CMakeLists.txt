@@ -119,3 +119,9 @@ IF(ZU4_U4_GAMEDIR)
 ELSE()
     message(WARNING "ZU4_U4_GAMEDIR not set - app will build without U4 game data.")
 ENDIF()
+
+# Strip extended attributes (e.g. com.apple.quarantine on downloaded game data)
+# from the whole bundle. codesign rejects "resource fork / Finder information"
+# detritus, so this must run before the (later) CodeSign build phase.
+add_custom_command(TARGET zu4 POST_BUILD
+    COMMAND xattr -cr "$<TARGET_BUNDLE_DIR:zu4>")
