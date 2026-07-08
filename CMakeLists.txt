@@ -35,8 +35,7 @@ set(ZU4_CXX_SRCS
     src/textview.cpp src/tile.cpp src/tileanim.cpp src/tilemap.cpp
     src/tileset.cpp src/tileview.cpp src/u4.cpp src/view.cpp src/xml.cpp)
 
-# Touch-control overlay is added in a later step.
-set(ZU4_IOS_SRCS "")
+set(ZU4_IOS_SRCS ios/zu4_ios_ui.mm)
 
 add_compile_definitions(ZU4_IOS)
 
