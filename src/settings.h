@@ -96,8 +96,11 @@ typedef struct SettingsData {
 extern SettingsData settings;
 
 typedef struct u4settings_t {
-	char path[64];
-	char filename[80];
+	/* Large enough for long iOS app-container paths: the save directory is an
+	 * absolute path under $HOME/Documents (~80 chars on device, ~170 in the
+	 * Simulator). The old 64/80 sizes truncated it and broke saving/loading. */
+	char path[1024];
+	char filename[1088];
 } u4settings_t;
 
 u4settings_t* zu4_settings_ptr();

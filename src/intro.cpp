@@ -718,7 +718,7 @@ void IntroController::finishInitiateGame(const std::string &nameBuffer, SexType 
     SaveGamePlayerRecord avatar;
 
     u4settings_t *u4settings = zu4_settings_ptr();
-    char saveGameFileName[80];
+    char saveGameFileName[1024];
 
     snprintf(saveGameFileName, sizeof(saveGameFileName), "%s%s", u4settings->path, PARTY_SAV_BASE_FILENAME);
     FILE *saveGameFile = fopen(saveGameFileName, "wb");
@@ -890,7 +890,7 @@ void IntroController::journeyOnward() {
      * initiate game
      */
     u4settings_t *u4settings = zu4_settings_ptr();
-    char saveGameFileName[80];
+    char saveGameFileName[1024];
     snprintf(saveGameFileName, sizeof(saveGameFileName), "%s%s", u4settings->path, PARTY_SAV_BASE_FILENAME);
     saveGameFile = fopen(saveGameFileName, "rb");
     if (saveGameFile) {

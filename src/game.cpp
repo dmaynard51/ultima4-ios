@@ -169,7 +169,7 @@ void GameController::deinit() {
 
 void GameController::init() {
     FILE *saveGameFile, *monstersFile;
-    char saveGameFileName[80];
+    char saveGameFileName[1024];
 
     zu4_error(ZU4_LOG_DBG, "gameInit() running.");
 
@@ -331,7 +331,7 @@ int gameSave() {
     /****************************************************/
 
     u4settings_t *u4settings = zu4_settings_ptr();
-    char saveGameFileName[80];
+    char saveGameFileName[1024];
     snprintf(saveGameFileName, sizeof(saveGameFileName), "%s%s", u4settings->path, PARTY_SAV_BASE_FILENAME);
     saveGameFile = fopen(saveGameFileName, "wb");
     if (!saveGameFile) {
