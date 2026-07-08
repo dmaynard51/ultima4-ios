@@ -20,13 +20,20 @@ U4_DATA="${1:-}"
 mkdir -p "$WORK"; cd "$WORK"
 
 # 0. Ultima IV game data (free download if not supplied).
+# Require BOTH AVATAR.EXE and TITLE.EXE (the intro reads its signature data from
+# title.exe); a partial extract otherwise crashes on the title screen.
+data_ok() { [ -f "$1/AVATAR.EXE" ] || [ -f "$1/avatar.exe" ] && { [ -f "$1/TITLE.EXE" ] || [ -f "$1/title.exe" ]; }; }
 if [ -z "$U4_DATA" ]; then
   U4_DATA="$WORK/ultima4"
-  if [ ! -f "$U4_DATA/AVATAR.EXE" ] && [ ! -f "$U4_DATA/avatar.exe" ]; then
+  if ! data_ok "$U4_DATA"; then
     echo "Downloading the free Ultima IV game data..."
     curl -L -o u4.zip "http://ultima.thatfleminggent.com/ultima4.zip"
-    mkdir -p "$U4_DATA" && (cd "$U4_DATA" && unzip -oq ../u4.zip)
+    rm -rf "$U4_DATA"; mkdir -p "$U4_DATA" && (cd "$U4_DATA" && unzip -oq ../u4.zip)
   fi
+fi
+if ! data_ok "$U4_DATA"; then
+  echo "ERROR: Ultima IV data in '$U4_DATA' is missing/incomplete (need AVATAR.EXE + TITLE.EXE)." >&2
+  exit 1
 fi
 
 # 1. SDL2 static for the iOS Simulator (built once).
