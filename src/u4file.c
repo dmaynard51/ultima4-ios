@@ -311,8 +311,9 @@ void zu4_read_strtable(U4FILE *f, long offset, char **array, int nstrings) {
 			buffer[j++] = c;
 		}
 
-		array[i] = (char*)malloc(sizeof(char) * j);
-		strncpy(array[i], buffer, j);
+		array[i] = (char*)malloc(sizeof(char) * (j + 1));
+		memcpy(array[i], buffer, j);
+		array[i][j] = '\0'; /* NUL-terminate: callers build std::strings from these */
 		memset(buffer, 0, sizeof(buffer));
 	}
 }
