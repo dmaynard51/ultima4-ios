@@ -41,6 +41,8 @@ static bool g_kb_shown = false;     // our own record of keyboard visibility (SD
 // A transparent overlay that holds the buttons but lets touches on empty areas fall through
 // to the game view below (so tapping the map still works). It lives on the UIWindow — NOT
 // inside the SDL view — so the keyboard-scale transform never resizes the buttons.
+static void zu4_quiet_keyboard(void);   // defined below; used by keyboardWillShow
+
 @interface Zu4PassthroughView : UIView
 @end
 @implementation Zu4PassthroughView
@@ -87,6 +89,7 @@ static bool g_kb_shown = false;     // our own record of keyboard visibility (SD
 
 - (void)keyboardWillShow:(NSNotification *)note
 {
+	zu4_quiet_keyboard();   // suppress predictive/suggestion UI
 	if(g_root_view == nil)
 		return;
 	CGRect kb = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
@@ -123,11 +126,47 @@ static bool g_kb_shown = false;     // our own record of keyboard visibility (SD
 // Retain the target for the lifetime of the app so the button actions fire.
 static Zu4ButtonTarget *g_btn_target = nil;
 
+// SDL drives text input through a hidden UITextField whose accumulating text
+// makes iOS show a predictive/candidate bar (and, on iOS 17+, inline
+// predictions) — the "letters filling" the user sees. U4 is single-key driven,
+// so we don't want any of that. Walk the view tree, find SDL's text field, and
+// switch off every suggestion/prediction feature.
+static void zu4_quiet_text_field(UIView *v)
+{
+	if(v == nil)
+		return;
+	if([v isKindOfClass:[UITextField class]]) {
+		UITextField *tf = (UITextField *)v;
+		tf.autocorrectionType = UITextAutocorrectionTypeNo;
+		tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
+		tf.spellCheckingType = UITextSpellCheckingTypeNo;
+		tf.smartQuotesType = UITextSmartQuotesTypeNo;
+		tf.smartDashesType = UITextSmartDashesTypeNo;
+		tf.smartInsertDeleteType = UITextSmartInsertDeleteTypeNo;
+		// iOS 17+ inline predictions (ghosted suggestion text).
+		if(@available(iOS 17.0, *))
+			tf.inlinePredictionType = UITextInlinePredictionTypeNo;
+	}
+	for(UIView *sub in v.subviews)
+		zu4_quiet_text_field(sub);
+}
+
+static void zu4_quiet_keyboard(void)
+{
+	// Defer so SDL has created/added its text field first.
+	dispatch_async(dispatch_get_main_queue(), ^{
+		for(UIWindow *w in [UIApplication sharedApplication].windows)
+			zu4_quiet_text_field(w);
+	});
+}
+
 void zu4_ios_show_keyboard(int show)
 {
 	if(show) {
 		if(!SDL_IsTextInputActive())
 			SDL_StartTextInput();
+		zu4_quiet_text_field(g_root_view.window ?: g_root_view);
+		zu4_quiet_keyboard();
 		g_kb_shown = true;
 	} else {
 		if(SDL_IsTextInputActive())
