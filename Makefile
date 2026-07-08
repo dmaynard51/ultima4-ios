@@ -26,7 +26,7 @@ LIBS_XML2 := $(shell $(PKG_CONFIG) --libs libxml-2.0)
 #UIFLAGS += -ggdb1 -rdynamic -g -O0 -fno-inline -fno-eliminate-unused-debug-types -gstabs -g3
 
 UIFLAGS := -Wall -Ideps/yxml $(CFLAGS_SDL2) $(CFLAGS_XML2)
-UILIBS := $(LIBS_SDL2) $(LIBS_XML2) -lGL -lGLU
+UILIBS := $(LIBS_SDL2) $(LIBS_XML2)
 
 TARGET := u4
 
