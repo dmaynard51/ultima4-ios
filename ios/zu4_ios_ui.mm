@@ -52,10 +52,18 @@ static void zu4_quiet_keyboard(void);   // defined below; used by keyboardWillSh
 @interface Zu4PassthroughView : UIView
 @end
 @implementation Zu4PassthroughView
+// Return YES so hitTest still recurses into subviews (buttons) even when they've
+// been transformed outside this view's own bounds — e.g. the D-pad shifted left
+// under the keyboard-scale. Passthrough is preserved by hitTest below (empty
+// areas still resolve to self and are dropped).
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+	return YES;
+}
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
 	UIView *hit = [super hitTest:point withEvent:event];
-	return hit == self ? nil : hit;   // empty area -> pass through to the game view
+	return (hit == self) ? nil : hit;   // empty area -> pass through to the game view
 }
 @end
 
