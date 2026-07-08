@@ -36,7 +36,13 @@ static SDL_Window *g_window = NULL;
 static UIView *g_root_view = nil;   // the SDL view (fills the window)
 static CGRect g_full_frame;         // its normal, full-screen frame
 static UIView *g_overlay = nil;     // non-scaled button layer (sibling of the SDL view)
+static UIView *g_dpad = nil;        // movement D-pad container (shifts left when kb is up)
 static bool g_kb_shown = false;     // our own record of keyboard visibility (SDL's flag desyncs)
+
+// How far to nudge the D-pad left while the keyboard is up (points, in the
+// overlay's coordinate space, so the net on-screen shift is this * the overlay
+// keyboard-scale). Counteracts the inward drift from center-anchored scaling.
+static const CGFloat ZU4_DPAD_KB_SHIFT = 150.0;
 
 // A transparent overlay that holds the buttons but lets touches on empty areas fall through
 // to the game view below (so tapping the map still works). It lives on the UIWindow — NOT
@@ -110,6 +116,10 @@ static void zu4_quiet_keyboard(void);   // defined below; used by keyboardWillSh
 			    CGAffineTransformMakeScale(k, k),
 			    CGAffineTransformMakeTranslation(0, -lift));
 		}
+		// Move only the D-pad further left while the keyboard is up, to undo the
+		// inward drift from the overlay's center-anchored scaling.
+		if(g_dpad)
+			g_dpad.transform = CGAffineTransformMakeTranslation(-ZU4_DPAD_KB_SHIFT, 0);
 	});
 }
 
@@ -119,6 +129,8 @@ static void zu4_quiet_keyboard(void);   // defined below; used by keyboardWillSh
 		[self applyKeyboardScale:1.0];
 		if(g_overlay)
 			g_overlay.transform = CGAffineTransformIdentity;
+		if(g_dpad)
+			g_dpad.transform = CGAffineTransformIdentity;   // back to normal spot
 	});
 }
 @end
@@ -248,18 +260,25 @@ void zu4_ios_setup_ui(SDL_Window *window)
 	const CGFloat G = 5.0;    // gap
 
 	// ---- Left side: movement D-pad, anchored bottom-left ----
-	// Hug the physical left edge (ignore the safe-area inset, which reserves
-	// ~an inch in landscape) with just a few points of margin.
+	// The D-pad lives in its own container so it can be shifted left on its own
+	// when the keyboard is up, without disturbing its no-keyboard position.
+	// Hug the physical left edge (ignore the safe-area inset, ~an inch in
+	// landscape) with just a few points of margin.
+	CGFloat dpSpan = DS * 3 + G * 2;
 	CGFloat dpx = b.origin.x + 4.0;
-	CGFloat dpy = bottom - (DS * 3 + G * 2) - 10.0;
-	[g_overlay addSubview:zu4_make_button(@"▲", SDLK_UP,
-	         CGRectMake(dpx + DS + G, dpy, DS, DS), t)];
-	[g_overlay addSubview:zu4_make_button(@"◀", SDLK_LEFT,
-	         CGRectMake(dpx, dpy + DS + G, DS, DS), t)];
-	[g_overlay addSubview:zu4_make_button(@"▶", SDLK_RIGHT,
-	         CGRectMake(dpx + (DS + G) * 2, dpy + DS + G, DS, DS), t)];
-	[g_overlay addSubview:zu4_make_button(@"▼", SDLK_DOWN,
-	         CGRectMake(dpx + DS + G, dpy + (DS + G) * 2, DS, DS), t)];
+	CGFloat dpy = bottom - dpSpan - 10.0;
+	g_dpad = [[Zu4PassthroughView alloc] initWithFrame:CGRectMake(dpx, dpy, dpSpan, dpSpan)];
+	g_dpad.backgroundColor = [UIColor clearColor];
+	[g_overlay addSubview:g_dpad];
+	// Buttons positioned relative to the container's origin.
+	[g_dpad addSubview:zu4_make_button(@"▲", SDLK_UP,
+	         CGRectMake(DS + G, 0, DS, DS), t)];
+	[g_dpad addSubview:zu4_make_button(@"◀", SDLK_LEFT,
+	         CGRectMake(0, DS + G, DS, DS), t)];
+	[g_dpad addSubview:zu4_make_button(@"▶", SDLK_RIGHT,
+	         CGRectMake((DS + G) * 2, DS + G, DS, DS), t)];
+	[g_dpad addSubview:zu4_make_button(@"▼", SDLK_DOWN,
+	         CGRectMake(DS + G, (DS + G) * 2, DS, DS), t)];
 
 	// ---- Right side: action buttons, stacked bottom-right ----
 	// U4's commands are all typed letters, so the keyboard button is primary.
