@@ -25,12 +25,37 @@
 #include "sound.h"
 #include "u4file.h"
 
+#ifdef ZU4_IOS
+// Pull in SDL so `main` is renamed to SDL_main; libSDL2main provides the real
+// iOS UIApplication entry point that calls it.
+#include <SDL.h>
+#include <unistd.h>
+#include <CoreFoundation/CoreFoundation.h>
+// The game data (conf/, graphics/, ultima4/, ...) is bundled read-only in the
+// app; make the bundle's resource directory the working dir so zu4's relative
+// data paths resolve. Saves are written elsewhere (Documents) via settings.c.
+static void zu4_ios_chdir_to_bundle(void) {
+	CFBundleRef bundle = CFBundleGetMainBundle();
+	if (bundle == NULL) { return; }
+	CFURLRef url = CFBundleCopyResourcesDirectoryURL(bundle);
+	if (url == NULL) { return; }
+	char path[1024];
+	if (CFURLGetFileSystemRepresentation(url, true, (UInt8*)path, sizeof(path))) {
+		chdir(path);
+	}
+	CFRelease(url);
+}
+#endif
+
 bool verbose = false;
 bool quit = false;
 bool useProfile = false;
 std::string profileName = "";
 
 int main(int argc, char *argv[]) {
+#ifdef ZU4_IOS
+	zu4_ios_chdir_to_bundle();
+#endif
 	if (!u4fopen("AVATAR.EXE")) {
 		zu4_error(ZU4_LOG_ERR, 	"xu4 requires the PC version of Ultima IV to be present.\n");
 	}

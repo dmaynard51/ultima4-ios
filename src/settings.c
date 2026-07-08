@@ -45,7 +45,13 @@ void zu4_settings_init(bool useProfile, const char *profileName) {
 	else {
 		char *home = getenv("HOME");
 		if (home && home[0]) {
+#ifdef ZU4_IOS
+			/* The iOS sandbox forbids writing to the container root ($HOME);
+			 * only Documents/Library/tmp are writable. Save under Documents. */
+			snprintf(u4settings.path, sizeof(u4settings.path), "%s/Documents/.xu4/", home);
+#else
 			snprintf(u4settings.path, sizeof(u4settings.path), "%s/.xu4/", home);
+#endif
 		}
 		else { snprintf(u4settings.path, sizeof(u4settings.path), "./"); }
 	}
