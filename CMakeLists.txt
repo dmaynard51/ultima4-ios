@@ -120,6 +120,12 @@ ELSE()
     message(WARNING "ZU4_U4_GAMEDIR not set - app will build without U4 game data.")
 ENDIF()
 
+# The original U4 files ship read-only (0444) and copy_directory preserves that,
+# but clearing an xattr needs write permission on the file. Make the bundle
+# writable first or the xattr pass below dies with EACCES on the game data.
+add_custom_command(TARGET zu4 POST_BUILD
+    COMMAND chmod -R u+w "$<TARGET_BUNDLE_DIR:zu4>")
+
 # Strip extended attributes (e.g. com.apple.quarantine on downloaded game data)
 # from the whole bundle. codesign rejects "resource fork / Finder information"
 # detritus, so this must run before the (later) CodeSign build phase.
