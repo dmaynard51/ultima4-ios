@@ -88,7 +88,11 @@ set_target_properties(zu4 PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/ios/Info.plist.in"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
-    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0")
+    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0"
+    # Required for `xcodebuild archive` to produce an app archive (not a
+    # generic one): install the app into the archive's Applications dir.
+    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+    XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
 
 # App icon: compile ios/Assets.xcassets (holding the AppIcon set) into the bundle.
 target_sources(zu4 PRIVATE "${CMAKE_SOURCE_DIR}/ios/Assets.xcassets")
@@ -119,6 +123,12 @@ IF(ZU4_U4_GAMEDIR)
 ELSE()
     message(WARNING "ZU4_U4_GAMEDIR not set - app will build without U4 game data.")
 ENDIF()
+
+# The original U4 files ship read-only (0444) and copy_directory preserves that,
+# but clearing an xattr needs write permission on the file. Make the bundle
+# writable first or the xattr pass below dies with EACCES on the game data.
+add_custom_command(TARGET zu4 POST_BUILD
+    COMMAND chmod -R u+w "$<TARGET_BUNDLE_DIR:zu4>")
 
 # Strip extended attributes (e.g. com.apple.quarantine on downloaded game data)
 # from the whole bundle. codesign rejects "resource fork / Finder information"
