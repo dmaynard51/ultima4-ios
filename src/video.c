@@ -62,6 +62,14 @@ void zu4_video_init() {
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0"); /* nearest-neighbour */
 
+#ifdef ZU4_IOS
+	/* Without this, SDL derives the allowed rotations from the requested
+	 * window size (below), which is always landscape-shaped (320x200 scaled)
+	 * regardless of what Info.plist allows -- so portrait would never
+	 * actually be reachable. This hint overrides that. */
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait");
+#endif
+
 	window = SDL_CreateWindow("Ultima IV",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		SCREEN_WIDTH * settings.scale, SCREEN_HEIGHT * settings.scale,
